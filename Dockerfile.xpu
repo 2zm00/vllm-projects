@@ -1,0 +1,19 @@
+# 최신 Intel GPU 가속 지원 이미지 사용
+FROM intelanalytics/ipex-llm-serving-xpu:latest
+
+# 작업 디렉토리 설정
+WORKDIR /llm
+
+# 필요한 경우 추가 패키지 설치 (선택 사항)
+RUN pip install --no-cache-dir -U transformers accelerate
+
+# vLLM 서버 실행을 위한 환경 변수 (성능 최적화용)
+ENV OMP_NUM_THREADS=1
+ENV FI_PROVIDER=tcp
+ENV USE_XPU_VISIBLE_DEVICES=0
+
+# 포트 개방
+EXPOSE 8000
+
+# 실행 명령은 docker-compose에서 관리하거나 여기서 직접 지정 가능
+ENTRYPOINT ["python3", "-m", "vllm.entrypoints.openai.api_server"]

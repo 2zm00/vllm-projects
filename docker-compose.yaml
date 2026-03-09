@@ -1,0 +1,28 @@
+services:
+  vllm-qwen:
+    build:
+      context: .
+      dockerfile: Dockerfile.xpu
+    container_name: qwen35-vllm-xpu
+    image: my-vllm-qwen:3.5
+    ports:
+      - "8000:8000"
+    volumes:
+      # 호스트의 모델 경로를 컨테이너 내부에 마운트
+      # C:\models 식으로 작성하거나 WSL2 경로(/mnt/c/models) 사용 가능
+      - ./models:/llm/models
+    devices:
+      # Intel GPU(Arc/iGPU)를 컨테이너에 할당하는 핵심 옵션
+      # - /dev/dri:/dev/dri
+      - /dev/dxg:/dev/dxg
+    environment:
+      - DEVICE=xpu
+      - MODEL_NAME=Qwen3.5-9B
+    command: >
+      --model /llm/models/Qwen3.5-9B
+      --device xpu
+      --dtype float16
+      --max-model-len 4096
+      --trust-remote-code
+      --gpu-memory-utilization 0.9
+    restart: unless-stopped
